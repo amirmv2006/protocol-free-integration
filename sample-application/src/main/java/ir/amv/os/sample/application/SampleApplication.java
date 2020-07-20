@@ -1,7 +1,6 @@
 package ir.amv.os.sample.application;
 
 import ir.amv.os.protocol.free.integration.api.EnableProtocolFreeApi;
-import ir.amv.os.protocol.free.integration.api.ProtocolFreeApiConfig.MyGateway;
 import ir.amv.os.protocol.free.integration.api.order.Order;
 import ir.amv.os.protocol.free.integration.api.order.OrderGateway;
 import java.util.UUID;
@@ -16,10 +15,9 @@ public class SampleApplication {
 
   @Bean
   public InitializingBean afterStartup(
-      OrderGateway orderGateway,
-      MyGateway myGateway) {
+      OrderGateway orderGateway
+  ) {
     return () -> {
-//      myGateway.sendToRabbit("Hello");
       Order order = Order.builder()
           .orderId(UUID.randomUUID())
           .username("amir")
