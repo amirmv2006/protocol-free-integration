@@ -1,0 +1,6 @@
+spring:
+  cloud:
+    stream:
+      bindings:
+        order-in-0:
+          destination: order
