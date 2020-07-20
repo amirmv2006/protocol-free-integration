@@ -33,7 +33,7 @@ public class ProtocolFreeApiConfig {
   public IntegrationFlow asyncSubmitOrder(AsyncRabbitTemplate asyncRabbitTemplate) {
     return f -> f
         .handle(Amqp.asyncOutboundGateway(asyncRabbitTemplate)
-            .exchangeName("order")); // default exchange - route to queue 'foo'
+            .exchangeName("order"));
   }
 
 
