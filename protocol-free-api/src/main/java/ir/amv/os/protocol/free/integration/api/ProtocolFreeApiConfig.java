@@ -1,42 +1,41 @@
 package ir.amv.os.protocol.free.integration.api;
 
-import org.springframework.amqp.core.AmqpTemplate;
+import ir.amv.os.protocol.free.integration.api.order.Order;
+import ir.amv.os.protocol.free.integration.api.order.OrderGateway;
+import java.util.UUID;
 import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.amqp.dsl.Amqp;
 import org.springframework.integration.annotation.IntegrationComponentScan;
-import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.messaging.MessageChannel;
 
 @Configuration
 @IntegrationComponentScan
+@EnableIntegration
 @Import(RabbitAutoConfiguration.class)
 public class ProtocolFreeApiConfig {
 
   @Bean
   AsyncRabbitTemplate template(RabbitTemplate template) {
-    return new AsyncRabbitTemplate(template);
+    AsyncRabbitTemplate asyncRabbitTemplate = new AsyncRabbitTemplate(template);
+    return asyncRabbitTemplate;
   }
 
   @Bean
-  public MessageChannel submitOrderChannel() {
-    return new DirectChannel();
+  public IntegrationFlow asyncSubmitOrder(AsyncRabbitTemplate asyncRabbitTemplate) {
+    return f -> f
+        .handle(Amqp.asyncOutboundGateway(asyncRabbitTemplate)
+            .exchangeName("order")); // default exchange - route to queue 'foo'
   }
 
-  @Bean
-  public IntegrationFlow submitOrder(AmqpTemplate amqpTemplate) {
-    return f -> f.handle(
-        Amqp.outboundGateway(amqpTemplate)
-            .exchangeName("order")
-    );
-  }
 
   @Bean
   public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
@@ -44,6 +43,12 @@ public class ProtocolFreeApiConfig {
   }
 
   public static void main(String[] args) {
-    SpringApplication.run(ProtocolFreeApiConfig.class);
+    ConfigurableApplicationContext applicationContext = SpringApplication.run(ProtocolFreeApiConfig.class);
+    OrderGateway orderGateway = applicationContext.getBean(OrderGateway.class);
+    orderGateway.submitOrder(Order.builder()
+        .orderId(UUID.randomUUID())
+        .username("amir")
+        .cost(100)
+        .build());
   }
 }

@@ -6,6 +6,6 @@ import org.springframework.integration.annotation.MessagingGateway;
 @MessagingGateway(name = "OrderGateway")
 public interface OrderGateway {
 
-  @Gateway(requestChannel = "submitOrderChannel")
+  @Gateway(requestChannel = "asyncSubmitOrder.input")
   void submitOrder(Order order);
 }
