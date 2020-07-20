@@ -17,6 +17,7 @@
   <modules>
     <module>protocol-free-api</module>
     <module>protocol-free-app</module>
+    <module>sample-application</module>
   </modules>
 
   <properties>
